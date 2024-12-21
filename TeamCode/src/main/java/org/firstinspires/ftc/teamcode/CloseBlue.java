@@ -63,14 +63,17 @@ public class CloseBlue extends LinearOpMode {
                         peregrinesArm.clawToPosition(0), //opens the claw
                         peregrinesArm.waitSeconds(1), //waits 1 seconds
                         peregrinesArm.rotatorToPower(-1, 1.3), //moves the arm down but the actuator is still out
-                        drive.actionBuilder(drive.pose).turn(Math.toRadians(32)).build(), //turns the robot 32 degrees
+                        drive.actionBuilder(drive.pose).turn(Math.toRadians(29)).build(), //turns the robot 32 degrees
                         peregrinesArm.clawToPosition(0), //opens the claw
                         peregrinesArm.clawRotatorToPosition(0), //flops the claw rotator onto the ground while its open
                         peregrinesArm.waitSeconds(.1), //waits .1 seconds
                         peregrinesArm.clawToPosition(.75), //closes the claw
                         peregrinesArm.rotatorToPower(1, 1.3), //moves the arm up perpendicular to the ground
+                        drive.actionBuilder(drive.pose).turn(Math.toRadians(-29)).build(), //turns the robot back
                         peregrinesArm.waitSeconds(1), //waits 1 seconds
-                        peregrinesArm.clawRotatorToPosition(1) //moves claw into basket
+                        peregrinesArm.clawRotatorToPosition(1), //moves claw into basket
+                        peregrinesArm.clawToPosition(0) //opens claw and hopefully deposits sample
+
                 )
         );
     }
