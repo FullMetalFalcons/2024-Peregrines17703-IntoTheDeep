@@ -16,7 +16,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @Config
 @Autonomous
-public class CloseBlue extends LinearOpMode {
+public class CloseRed extends LinearOpMode {
     public void runOpMode() {
 
         DcMotorEx arm, rotator;
@@ -52,7 +52,7 @@ public class CloseBlue extends LinearOpMode {
 
         Actions.runBlocking(
                 new SequentialAction(
-                        drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(54.5, 53), Math.toRadians(225)).build(), //moves to the position 54.5, 53 and aligns it so the back is facing the baskets
+                        drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(-54.5, -53), Math.toRadians(225)).build(), //moves to the position 54.5, 53 and aligns it so the back is facing the baskets
                         peregrinesArm.clawRotatorToPosition(.25), //sets the claw position to
                         peregrinesArm.clawToPosition(.75), //closes claw
                         peregrinesArm.rotatorToPower(1, 1.9), //moves arm up perpendicular to ground
@@ -74,7 +74,7 @@ public class CloseBlue extends LinearOpMode {
                         peregrinesArm.clawRotatorToPosition(1), //moves claw into basket
                         peregrinesArm.clawToPosition(0), //opens claw and hopefully deposits sample
                         peregrinesArm.clawRotatorToPosition(.25), //moves claw out of basket
-                        drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(21, -8.7), Math.toRadians(0)).build() //moves into observation zone
+                        drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(-21, -8.7), Math.toRadians(180)).build() //moves into observation zone
                 )
         );
     }
