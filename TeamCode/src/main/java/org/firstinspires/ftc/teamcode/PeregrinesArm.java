@@ -20,14 +20,15 @@ public class PeregrinesArm {
 
     private DcMotorEx Arm;
     private DcMotorEx Slide;
-    private Servo Claw;
+    private Servo Claw, clawRotator;
+
     public PeregrinesArm(HardwareMap hardwareMap, Telemetry telemetry1) {
         // Set up motors using MecanumDrive constants
         Arm = (DcMotorEx) hardwareMap.dcMotor.get("parRight");
-
         Slide = (DcMotorEx) hardwareMap.dcMotor.get("rotator");
 
         Claw = hardwareMap.servo.get("claw");
+        clawRotator = hardwareMap.servo.get("clawRotator");
 
         // The arm will hold its position when given 0.0 power
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
@@ -43,6 +44,7 @@ public class PeregrinesArm {
     public class ClawToPosition implements Action {
         // Use constructor parameter to set target position
         private double targetClawPosition;
+
         public ClawToPosition(double clawPos) {
             super();
             targetClawPosition = clawPos;
@@ -54,18 +56,40 @@ public class PeregrinesArm {
             return false;
         }
     }
+
     public ClawToPosition clawToPosition(double clawPos) {
         return new ClawToPosition(clawPos);
+    }
+
+    public class ClawRotatorToPosition implements Action {
+        // Use constructor parameter to set target position
+        private double targetClawPosition;
+
+        public ClawRotatorToPosition(double rotatorPos) {
+            super();
+            targetClawPosition = rotatorPos;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            clawRotator.setPosition(targetClawPosition);
+            return false;
+        }
+    }
+
+    public ClawRotatorToPosition clawRotatorToPosition(double rotatorPos) {
+        return new ClawRotatorToPosition(rotatorPos);
     }
 
 
     public class ArmToPower implements Action {
         // Use constructor parameter to set target position
         private double armPower;
-        private long armTime;
+        private double armTime;
         private boolean armInitizalized = false;
         private long startInNS;
-        public ArmToPower(double armPower1, long ArmTime) {
+
+        public ArmToPower(double armPower1, double ArmTime) {
             super();
             armPower = armPower1;
             armTime = ArmTime;
@@ -74,17 +98,15 @@ public class PeregrinesArm {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            if (!armInitizalized){
+            if (!armInitizalized) {
                 startInNS = System.nanoTime();
                 armInitizalized = true;
             }
 
-            if (System.nanoTime() > startInNS + TimeUnit.SECONDS.toNanos(armTime))
-            {
+            if (System.nanoTime() > startInNS + TimeUnit.MILLISECONDS.toNanos((long) (armTime * 1000))) {
                 Arm.setPower(0);
                 return false;
-            }
-            else {
+            } else {
                 Arm.setPower(armPower);
                 return true;
             }
@@ -96,6 +118,7 @@ public class PeregrinesArm {
         private double rotatorTime;
         private boolean isInitialized = false;
         private long startTimeNS;
+
         public RotatorToPower(double rotPower, double rotTime) {
             super();
             rotatorPower = rotPower;
@@ -104,12 +127,12 @@ public class PeregrinesArm {
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            if (!isInitialized){
+            if (!isInitialized) {
                 startTimeNS = System.nanoTime();
                 isInitialized = true;
             }
 
-            if (System.nanoTime() > startTimeNS + TimeUnit.MILLISECONDS.toNanos((long)(rotatorTime*1000))) {
+            if (System.nanoTime() > startTimeNS + TimeUnit.MILLISECONDS.toNanos((long) (rotatorTime * 1000))) {
                 Slide.setPower(0);
                 return false;
             } else {
@@ -118,11 +141,40 @@ public class PeregrinesArm {
             }
         }
     }
-    public ArmToPower armToPower(double armPower, long armTime) {
+
+    /*public class ClawOpen implements Action {
+
+    }*/
+    public ArmToPower armToPower(double armPower, double armTime) {
         return new ArmToPower(armPower, armTime);
     }
 
     public RotatorToPower rotatorToPower(double rotatorPower, double rotatorTime) {
         return new RotatorToPower(rotatorPower, rotatorTime);
     }
+
+    public class Wait implements Action {
+        private double seconds;
+        private boolean isInitialized = false;
+        private long startTimeNs;
+
+        public Wait(double time) {
+            seconds = time;
+        }
+
+        @Override
+        public boolean run(@NonNull TelemetryPacket packet) {
+            if (!isInitialized) {
+                startTimeNs = System.nanoTime();
+                isInitialized = true;
+            }
+            return System.nanoTime() - startTimeNs < TimeUnit.MILLISECONDS.toNanos((long) (seconds * 1000));
+        }
+    }
+
+    // Add to PeregrinesArm:
+    public Wait waitSeconds(double seconds) {
+        return new Wait(seconds);
+    }
+
 }

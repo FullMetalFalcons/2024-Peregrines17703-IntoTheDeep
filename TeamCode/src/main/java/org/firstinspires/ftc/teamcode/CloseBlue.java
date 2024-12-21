@@ -53,9 +53,16 @@ public class CloseBlue extends LinearOpMode {
         Actions.runBlocking(
                 new SequentialAction(
                         drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(54.5, 53), Math.toRadians(225)).build(),
+                        peregrinesArm.clawRotatorToPosition(.25), //sets the claw position to
+                        peregrinesArm.clawToPosition(.75),
                         peregrinesArm.rotatorToPower(1, 1.9),
-                        peregrinesArm.armToPower(1, 3)
-
+                        peregrinesArm.armToPower(1, 3),
+                        peregrinesArm.waitSeconds(1),
+                        peregrinesArm.clawRotatorToPosition(1),
+                        peregrinesArm.waitSeconds(.75),
+                        peregrinesArm.clawToPosition(0),
+                        peregrinesArm.waitSeconds(1),
+                        peregrinesArm.armToPower(-1, 3)
                 )
         );
     }
