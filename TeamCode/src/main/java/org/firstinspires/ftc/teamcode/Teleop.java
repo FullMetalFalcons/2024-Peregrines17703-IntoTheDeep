@@ -56,8 +56,8 @@ public class Teleop extends LinearOpMode {
         rotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        clawClaw.setPosition(.75);
-        clawRotator.setPosition(1);
+        clawClaw.setPosition(.75); //sets the position of the claw to closed before teleop starts
+        clawRotator.setPosition(1); //sets the position of the claw hinge before teleop starts
 
         //All the code above this will begin when you press INIT on the Driver Hub
         //This waits until you press the play button
@@ -72,6 +72,7 @@ public class Teleop extends LinearOpMode {
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
             double pa = -gamepad1.right_stick_x;
+            //these booleans mean that it detects if one of these is pressed and returns true or false depending on if it is or isn't
             boolean arrrrrrmUp = gamepad2.right_bumper;
             boolean arrrrrrmDown = gamepad2.left_bumper;
             boolean rotUp = gamepad2.a;
@@ -79,7 +80,7 @@ public class Teleop extends LinearOpMode {
             boolean clawOpen = gamepad2.y;
             boolean rotatorclaw = gamepad2.x;
 
-
+            //math stuff prebuilt into mecanum
             double p1 = px + py - pa;
             double p2 = -px + py + pa;
             double p3 = -px + py - pa;
@@ -97,9 +98,10 @@ public class Teleop extends LinearOpMode {
             m3.setPower(p3);
             m4.setPower(p4);
 
+            //checks if each boolean returns true and if it does it does something
             if (rotatorclaw)
             {
-                clawRotator.setPosition(.25);
+                clawRotator.setPosition(.25); //servos use setPosition instead of setPower from a value 0-1
             }
             else
             {
@@ -116,7 +118,7 @@ public class Teleop extends LinearOpMode {
 
             if (arrrrrrmUp)
             {
-                arm.setPower(1);
+                arm.setPower(1); //Motors use setPower from a value 0-1
             }
             else if (arrrrrrmDown)
             {

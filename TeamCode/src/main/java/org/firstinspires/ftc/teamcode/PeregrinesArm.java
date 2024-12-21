@@ -35,7 +35,7 @@ public class PeregrinesArm {
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
     }
 
-
+    //listen man, idk what half of this means but it works. and i dont have the time to do it right now but its basically just different Actions for Roadrunner 1x which is a lot harder for some reason
     public void setClawPosition(double desiredPosition) {
         Claw.setPosition(desiredPosition);
     }
