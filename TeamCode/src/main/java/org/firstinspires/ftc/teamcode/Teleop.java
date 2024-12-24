@@ -35,26 +35,30 @@ public class Teleop extends LinearOpMode {
         m3.setDirection(DcMotorSimple.Direction.REVERSE);
 
         //This resets the encoder values when the code is initialized
-        m1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        /*m1.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         m2.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         m3.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
-        m4.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        m4.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);*/
+        rotator.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
         //This makes the wheels tense up and stay in position when it is not moving, opposite is FLOAT
         m1.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         m2.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         m3.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        m4.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         rotator.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         arm.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
 
         //This lets you look at encoder values while the OpMode is active
         //If you have a STOP_AND_RESET_ENCODER, make sure to put this below it
-        m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        /*m1.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m2.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         m3.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        m4.setMode(DcMotor.RunMode.RUN_USING_ENCODER);*/
         rotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        //rotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        //arm.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
 
         clawClaw.setPosition(.75); //sets the position of the claw to closed before teleop starts
         clawRotator.setPosition(1); //sets the position of the claw hinge before teleop starts
@@ -69,22 +73,33 @@ public class Teleop extends LinearOpMode {
         while(opModeIsActive()) {
             //MecanumDrive: Left stick moves up/down/strafe, right stick turns
 //Requires Mecanum wheels
+            telemetry.addData("rotator value", rotator.getCurrentPosition());
+            telemetry.update();
             double px = gamepad1.left_stick_x;
             double py = -gamepad1.left_stick_y;
             double pa = -gamepad1.right_stick_x;
+            boolean slowMode = gamepad1.right_bumper;
+
             //these booleans mean that it detects if one of these is pressed and returns true or false depending on if it is or isn't
             boolean arrrrrrmUp = gamepad2.right_bumper;
             boolean arrrrrrmDown = gamepad2.left_bumper;
             boolean rotUp = gamepad2.a;
             boolean rotDown = gamepad2.b;
             boolean clawOpen = gamepad2.y;
-            boolean rotatorclaw = gamepad2.x;
+            boolean clawClose = gamepad2.x;
+            boolean isOpen = false; // boolean used to check if the claw is open
+            boolean rotatorClawDown = gamepad2.dpad_down;
+            boolean rotatorClawUp = gamepad2.dpad_up;
 
             //math stuff prebuilt into mecanum
             double p1 = px + py - pa;
             double p2 = -px + py + pa;
             double p3 = -px + py - pa;
             double p4 = px + py + pa;
+            double p1a = p1 / 3;
+            double p2a = p2 / 3;
+            double p3a = p3 / 3;
+            double p4a = p4 / 3;
             double max = Math.max(1.0, Math.abs(p1));
             max = Math.max(max, Math.abs(p2));
             max = Math.max(max, Math.abs(p3));
@@ -93,17 +108,28 @@ public class Teleop extends LinearOpMode {
             p2 /= max;
             p3 /= max;
             p4 /= max;
-            m1.setPower(p1);
-            m2.setPower(p2);
-            m3.setPower(p3);
-            m4.setPower(p4);
+
+            if (slowMode) {
+                m1.setPower(p1a);
+                m2.setPower(p2a);
+                m3.setPower(p3a);
+                m4.setPower(p4a);
+            }
+
+            if (!slowMode) {
+                m1.setPower(p1);
+                m2.setPower(p2);
+                m3.setPower(p3);
+                m4.setPower(p4);
+            }
 
             //checks if each boolean returns true and if it does it does something
-            if (rotatorclaw)
+            if (rotatorClawDown)
             {
-                clawRotator.setPosition(.25); //servos use setPosition instead of setPower from a value 0-1
+                clawRotator.setPosition(.25);
             }
-            else
+
+            if (rotatorClawUp)
             {
                 clawRotator.setPosition(1);
             }
@@ -112,7 +138,9 @@ public class Teleop extends LinearOpMode {
             {
                 clawClaw.setPosition(0);
             }
-            else {
+
+            if (clawClose)
+            {
                 clawClaw.setPosition(.75);
             }
 
@@ -131,6 +159,7 @@ public class Teleop extends LinearOpMode {
             if (rotUp)
             {
                 rotator.setPower(1);
+                //rotator.setTargetPosition(4644);
             }
             else if (rotDown)
             {

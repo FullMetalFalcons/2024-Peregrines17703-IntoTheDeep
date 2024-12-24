@@ -32,7 +32,10 @@ public class PeregrinesArm {
 
         // The arm will hold its position when given 0.0 power
         Arm.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        Slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
+        Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     //listen man, idk what half of this means but it works. and i dont have the time to do it right now but its basically just different Actions for Roadrunner 1x which is a lot harder for some reason
@@ -114,31 +117,18 @@ public class PeregrinesArm {
     }
 
     public class RotatorToPower implements Action {
-        private double rotatorPower;
-        private double rotatorTime;
-        private boolean isInitialized = false;
-        private long startTimeNS;
-
-        public RotatorToPower(double rotPower, double rotTime) {
+        private int rotatorPower;
+        public RotatorToPower(int rotPower) {
             super();
             rotatorPower = rotPower;
-            rotatorTime = rotTime;
         }
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            if (!isInitialized) {
-                startTimeNS = System.nanoTime();
-                isInitialized = true;
-            }
-
-            if (System.nanoTime() > startTimeNS + TimeUnit.MILLISECONDS.toNanos((long) (rotatorTime * 1000))) {
-                Slide.setPower(0);
-                return false;
-            } else {
-                Slide.setPower(rotatorPower);
-                return true;
-            }
+            Slide.setTargetPosition(rotatorPower);
+            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            Slide.setPower(1);
+            return true;
         }
     }
 
@@ -149,8 +139,8 @@ public class PeregrinesArm {
         return new ArmToPower(armPower, armTime);
     }
 
-    public RotatorToPower rotatorToPower(double rotatorPower, double rotatorTime) {
-        return new RotatorToPower(rotatorPower, rotatorTime);
+    public RotatorToPower rotatorToPower(int rotatorPower) {
+        return new RotatorToPower(rotatorPower);
     }
 
     public class Wait implements Action {
