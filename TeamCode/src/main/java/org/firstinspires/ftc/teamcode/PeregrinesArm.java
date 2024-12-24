@@ -128,7 +128,7 @@ public class PeregrinesArm {
             Slide.setTargetPosition(rotatorPower);
             Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             Slide.setPower(1);
-            return true;
+            return false;
         }
     }
 
