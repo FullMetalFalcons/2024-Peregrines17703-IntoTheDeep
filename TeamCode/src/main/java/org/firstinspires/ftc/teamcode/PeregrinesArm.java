@@ -22,6 +22,8 @@ public class PeregrinesArm {
     private DcMotorEx Slide;
     private Servo Claw, clawRotator;
 
+
+
     public PeregrinesArm(HardwareMap hardwareMap, Telemetry telemetry1) {
         // Set up motors using MecanumDrive constants
         Arm = (DcMotorEx) hardwareMap.dcMotor.get("parRight");
@@ -36,6 +38,10 @@ public class PeregrinesArm {
         Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         Slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+    }
+
+    public int getSlideEncoderValue() {
+        return Slide.getCurrentPosition();
     }
 
     //listen man, idk what half of this means but it works. and i dont have the time to do it right now but its basically just different Actions for Roadrunner 1x which is a lot harder for some reason
@@ -128,7 +134,7 @@ public class PeregrinesArm {
             Slide.setTargetPosition(rotatorPower);
             Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
             Slide.setPower(1);
-            return true;
+            return false;
         }
     }
 
