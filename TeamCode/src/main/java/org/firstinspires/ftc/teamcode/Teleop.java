@@ -96,10 +96,10 @@ public class Teleop extends LinearOpMode {
             double p2 = -px + py + pa;
             double p3 = -px + py - pa;
             double p4 = px + py + pa;
-            double p1a = p1 / 3;
-            double p2a = p2 / 3;
-            double p3a = p3 / 3;
-            double p4a = p4 / 3;
+            double p1a = p1 / 4;
+            double p2a = p2 / 4;
+            double p3a = p3 / 4;
+            double p4a = p4 / 4;
             double max = Math.max(1.0, Math.abs(p1));
             max = Math.max(max, Math.abs(p2));
             max = Math.max(max, Math.abs(p3));
