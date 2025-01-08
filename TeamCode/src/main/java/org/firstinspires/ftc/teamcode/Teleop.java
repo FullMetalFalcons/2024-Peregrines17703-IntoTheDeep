@@ -61,7 +61,7 @@ public class Teleop extends LinearOpMode {
 
 
         clawClaw.setPosition(.75); //sets the position of the claw to closed before teleop starts
-        clawRotator.setPosition(1); //sets the position of the claw hinge before teleop starts
+        clawRotator.setPosition(.55); //sets the position of the claw hinge before teleop starts
 
         //All the code above this will begin when you press INIT on the Driver Hub
         //This waits until you press the play button
@@ -126,12 +126,12 @@ public class Teleop extends LinearOpMode {
             //checks if each boolean returns true and if it does it does something
             if (rotatorClawDown)
             {
-                clawRotator.setPosition(.25);
+                clawRotator.setPosition(.4);
             }
 
             if (rotatorClawUp)
             {
-                clawRotator.setPosition(1);
+                clawRotator.setPosition(.55);
             }
 
             if (clawOpen)

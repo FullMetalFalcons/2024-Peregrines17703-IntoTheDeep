@@ -42,7 +42,7 @@ public class TestAuto extends LinearOpMode {
                 .build();
 
 
-        Action trajectoryActionChosen = strafeTrajectory;
+        Action trajectoryActionChosen =turnTrajectory;
 
         while (!isStopRequested() && !opModeIsActive()) {
             if (gamepad1.dpad_up) {

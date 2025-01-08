@@ -47,19 +47,13 @@ public class CloseBlue extends LinearOpMode {
         waitForStart();
         if (isStopRequested()) return;
 
-        //access the encoder value
-        int slideEncoderValue = peregrinesArm.getSlideEncoderValue();
-
-        //print or use the encoder value
-        telemetry.addData("Slide Encoder Value", slideEncoderValue);
-        telemetry.update();
         Actions.runBlocking(
                 new SequentialAction(
                         //preloaded sample
                         drive.actionBuilder(drive.pose).strafeToLinearHeading(new Vector2d(54.5, 53), Math.toRadians(225)).build(), //moves to the position 54.5, 53 and aligns it so the back is facing the baskets
                         peregrinesArm.clawRotatorToPosition(.25), //sets the claw position to .25
                         peregrinesArm.clawToPosition(.75), //closes claw
-                        peregrinesArm.rotatorToPower(3986), //moves arm up perpendicular to ground
+                        peregrinesArm.rotatorToPower(4464), //moves arm up perpendicular to ground
                         peregrinesArm.armToPower(1, 3), //moves the actuator to the top position
                         peregrinesArm.waitSeconds(1), //waits 1 second
                         peregrinesArm.clawRotatorToPosition(1), //moves the claw hinge into the basket
@@ -70,14 +64,13 @@ public class CloseBlue extends LinearOpMode {
                         peregrinesArm.waitSeconds(1), //waits 1 second
 
                         //right sample
-                        peregrinesArm.rotatorToPower(-3986
-                         ), //moves the arm down but the actuator is still out
+                        peregrinesArm.rotatorToPower(632), //moves the arm down but the actuator is still out
                         drive.actionBuilder(drive.pose).turn(Math.toRadians(33)).build(), //turns the robot 33 degrees
                         peregrinesArm.clawToPosition(0), //opens the claw
                         peregrinesArm.clawRotatorToPosition(0), //flops the claw rotator onto the ground while its open
                         peregrinesArm.waitSeconds(.1), //waits .1 seconds
                         peregrinesArm.clawToPosition(.75), //closes the claw
-                        peregrinesArm.rotatorToPower(3986), //moves the arm up perpendicular to the ground
+                        peregrinesArm.rotatorToPower(4644), //moves the arm up perpendicular to the ground
                         drive.actionBuilder(drive.pose).turn(Math.toRadians(-33)).build(), //turns the robot back
                         peregrinesArm.waitSeconds(1), //waits 1 seconds
                         peregrinesArm.clawRotatorToPosition(1), //moves claw into basket
