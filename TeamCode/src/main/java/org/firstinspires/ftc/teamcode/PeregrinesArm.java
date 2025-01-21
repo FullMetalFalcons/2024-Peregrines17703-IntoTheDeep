@@ -9,8 +9,17 @@ import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.PIDFCoefficients;
+import com.acmerobotics.roadrunner.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
+import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
+
+import com.acmerobotics.dashboard.config.Config;
+import com.acmerobotics.roadrunner.Action;
+import com.acmerobotics.roadrunner.Pose2d;
+import com.acmerobotics.roadrunner.SequentialAction;
+import com.acmerobotics.roadrunner.Vector2d;
+import com.acmerobotics.roadrunner.ftc.Actions;
 
 import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
@@ -22,7 +31,7 @@ public class PeregrinesArm {
     private DcMotorEx Slide;
     private Servo Claw, clawRotator;
 
-
+    CloseBlue closeBlue = new CloseBlue();
 
     public PeregrinesArm(HardwareMap hardwareMap, Telemetry telemetry1) {
         // Set up motors using MecanumDrive constants
@@ -39,6 +48,8 @@ public class PeregrinesArm {
         Slide.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
+
+
 
     public int getSlideEncoderValue() {
         return Slide.getCurrentPosition();
@@ -97,11 +108,13 @@ public class PeregrinesArm {
         private double armTime;
         private boolean armInitizalized = false;
         private long startInNS;
+        private double armDelay;
 
-        public ArmToPower(double armPower1, double ArmTime) {
+        public ArmToPower(double armPower1, double ArmTime, double delay) {
             super();
             armPower = armPower1;
             armTime = ArmTime;
+            armDelay = delay;
         }
 
 
@@ -112,41 +125,54 @@ public class PeregrinesArm {
                 armInitizalized = true;
             }
 
-            if (System.nanoTime() > startInNS + TimeUnit.MILLISECONDS.toNanos((long) (armTime * 1000))) {
-                Arm.setPower(0);
-                return false;
-            } else {
+            if (System.nanoTime() < startInNS + TimeUnit.MILLISECONDS.toNanos((long) ((armTime) * 1000))) {
                 Arm.setPower(armPower);
                 return true;
+            } else {
+                Arm.setPower(0);
+                return false;
             }
         }
     }
+    public ArmToPower armToPower(double armPower, double armTime, double delay) {
+        return new ArmToPower(armPower, armTime, delay);
+    }
+
 
     public class RotatorToPower implements Action {
         private int rotatorPower;
-        public RotatorToPower(int rotPower) {
+        private boolean rotInit = false;
+        private long rotstartTimeNs;
+        private double seconds;
+        public RotatorToPower(int rotPower, double time) {
             super();
+            seconds = time;
             rotatorPower = rotPower;
         }
 
         @Override
         public boolean run(@NonNull TelemetryPacket packet) {
-            Slide.setTargetPosition(rotatorPower);
-            Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            Slide.setPower(1);
-            return false;
+            if (!rotInit) {
+                rotstartTimeNs = System.nanoTime();
+                rotInit = true;
+            }
+            if  (System.nanoTime() - rotstartTimeNs > TimeUnit.MILLISECONDS.toNanos((long) (seconds * 1000))) {
+                Slide.setTargetPosition(rotatorPower);
+                Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+                Slide.setPower(1);
+                return false;
+            }
+            else {
+                return true;
+            }
         }
     }
 
     /*public class ClawOpen implements Action {
 
     }*/
-    public ArmToPower armToPower(double armPower, double armTime) {
-        return new ArmToPower(armPower, armTime);
-    }
-
-    public RotatorToPower rotatorToPower(int rotatorPower) {
-        return new RotatorToPower(rotatorPower);
+    public RotatorToPower rotatorToPower(int rotatorPower, double seconds) {
+        return new RotatorToPower(rotatorPower, seconds);
     }
 
     public class Wait implements Action {
@@ -167,6 +193,8 @@ public class PeregrinesArm {
             return System.nanoTime() - startTimeNs < TimeUnit.MILLISECONDS.toNanos((long) (seconds * 1000));
         }
     }
+
+
 
     // Add to PeregrinesArm:
     public Wait waitSeconds(double seconds) {

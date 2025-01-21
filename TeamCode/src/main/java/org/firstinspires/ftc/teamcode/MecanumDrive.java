@@ -74,7 +74,7 @@ public final class MecanumDrive {
         public DcMotorSimple.Direction rightBackDriveDirection = DcMotorSimple.Direction.FORWARD;
 
         // drive model parameters
-        public double inPerTick = 122.5/62288;
+       public double inPerTick = 122.5/62288;
         public double lateralInPerTick = 0.0012977353834883955;
         public double trackWidthTicks = 6265.105755129638;
 
