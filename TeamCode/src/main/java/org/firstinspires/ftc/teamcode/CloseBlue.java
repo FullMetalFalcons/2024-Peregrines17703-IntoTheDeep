@@ -54,7 +54,8 @@ public class CloseBlue extends LinearOpMode {
                                 peregrinesArm.waitSeconds(3),
                                 peregrinesArm.clawRotatorToPosition(1),
                                 peregrinesArm.waitSeconds(.2),
-                                peregrinesArm.clawToPosition(0)
+                                peregrinesArm.clawToPosition(0),
+                                peregrinesArm.waitSeconds(2)
                         ),
                         entireAuto
                 )
