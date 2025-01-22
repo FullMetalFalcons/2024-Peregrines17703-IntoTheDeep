@@ -28,8 +28,7 @@ public class CloseBlue extends LinearOpMode {
 
         entireAuto = drive.actionBuilder(drive.pose)
                 .strafeToLinearHeading(new Vector2d(64.5, 55.6), Math.toRadians(265))
-                .waitSeconds(7)
-                .turn(Math.toRadians(-30))
+                .waitSeconds(15)
                 .build();
 
         waitForStart();
@@ -39,15 +38,23 @@ public class CloseBlue extends LinearOpMode {
                 new ParallelAction(
                         peregrinesArm.clawRotatorToPosition(.4),
                         new SequentialAction(
-                                peregrinesArm.rotatorToPower(4664, 0),
-                                peregrinesArm.clawRotatorToPosition(.4),
-                                peregrinesArm.waitSeconds(2),
-                                peregrinesArm.armToPower(1, .8, 2),
-                                peregrinesArm.clawRotatorToPosition(1),
+                                peregrinesArm.rotatorToPower(4664, 0), //arm up
+                                peregrinesArm.clawRotatorToPosition(.4), //claw goes down
+                                peregrinesArm.waitSeconds(2), // 2 second delay
+                                peregrinesArm.armToPower(1, .8, 2), //actuator speedy
+                                peregrinesArm.clawRotatorToPosition(1), //claw goes to basket
                                 peregrinesArm.waitSeconds(.3),
-                                peregrinesArm.clawToPosition(0),
+                                peregrinesArm.clawToPosition(0), //claw opens
                                 peregrinesArm.waitSeconds(1),
-                                peregrinesArm.clawRotatorToPosition(.4)
+                                peregrinesArm.clawRotatorToPosition(.4), //claw goes out of basket
+                                peregrinesArm.rotatorToPower(600, 0),
+                                peregrinesArm.waitSeconds(3),
+                                peregrinesArm.clawToPosition(.75),
+                                peregrinesArm.rotatorToPower(4664, 0),
+                                peregrinesArm.waitSeconds(3),
+                                peregrinesArm.clawRotatorToPosition(1),
+                                peregrinesArm.waitSeconds(.2),
+                                peregrinesArm.clawToPosition(0)
                         ),
                         entireAuto
                 )

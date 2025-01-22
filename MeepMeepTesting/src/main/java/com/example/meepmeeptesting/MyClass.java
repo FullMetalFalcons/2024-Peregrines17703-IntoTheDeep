@@ -20,19 +20,9 @@ public class MyClass {
                 .build();
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(-12, 62,Math.toRadians(-90)))
-                        .strafeToLinearHeading(new Vector2d(0, 34), Math.toRadians(-90))
-                        .waitSeconds(3)
-                        .strafeToLinearHeading(new Vector2d(-58, 47), Math.toRadians(-90))
-                        .waitSeconds(3)
-                        .turn(Math.toRadians(180))
-                        .waitSeconds(1)
-                        .turn(Math.toRadians(-150))
-                        .waitSeconds(2)
-                        .turn(Math.toRadians(150))
-                        .waitSeconds(1)
-                        .turn(Math.toRadians(-205))
-                        .waitSeconds(2)
-                        .turn(Math.toRadians(205))
+                .strafeToLinearHeading(new Vector2d(64.5, 55.6), Math.toRadians(265))
+                .waitSeconds(7)
+                .turn(Math.toRadians(-30))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
