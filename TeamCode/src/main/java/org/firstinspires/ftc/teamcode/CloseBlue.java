@@ -27,8 +27,17 @@ public class CloseBlue extends LinearOpMode {
         Action entireAuto;
 
         entireAuto = drive.actionBuilder(drive.pose)
-                .strafeToLinearHeading(new Vector2d(64.5, 55.6), Math.toRadians(265))
-                .waitSeconds(15)
+                .strafeToLinearHeading(new Vector2d(6.1, 46.7), Math.toRadians(265)) //move to bar
+                .waitSeconds(7)
+                .strafeToLinearHeading(new Vector2d(51, 53), Math.toRadians(265))//move to right sample
+                .waitSeconds(3)
+                .strafeToLinearHeading(new Vector2d(63, 56), Math.toRadians(265)) // move to basket
+                .waitSeconds(7)
+                .strafeToLinearHeading(new Vector2d(64.2, 52), Math.toRadians(270)) //move out a few inches
+                .waitSeconds(3)
+                .strafeToLinearHeading(new Vector2d(63, 56), Math.toRadians(265)) //move back a few inches
+                .waitSeconds(5)
+                .strafeToLinearHeading(new Vector2d(63, 55), Math.toRadians(275))
                 .build();
 
         waitForStart();
@@ -38,23 +47,41 @@ public class CloseBlue extends LinearOpMode {
                 new ParallelAction(
                         peregrinesArm.clawRotatorToPosition(.4),
                         new SequentialAction(
-                                peregrinesArm.rotatorToPower(4664, 0), //arm up
-                                peregrinesArm.clawRotatorToPosition(.4), //claw goes down
-                                peregrinesArm.waitSeconds(2), // 2 second delay
-                                peregrinesArm.armToPower(1, .8, 2), //actuator speedy
-                                peregrinesArm.clawRotatorToPosition(1), //claw goes to basket
-                                peregrinesArm.waitSeconds(.3),
-                                peregrinesArm.clawToPosition(0), //claw opens
+                                peregrinesArm.rotatorToPower(2355, 0), //arm up
+                                peregrinesArm.clawRotatorToPosition(0.4),
+                                peregrinesArm.waitSeconds(3),
+                                peregrinesArm.armToPower(1, 1.1, 0),
                                 peregrinesArm.waitSeconds(1),
-                                peregrinesArm.clawRotatorToPosition(.4), //claw goes out of basket
+                                peregrinesArm.clawToPosition(0),
+                                peregrinesArm.rotatorToPower(2000, 0),
+                                peregrinesArm.waitSeconds(1.2),
+                                peregrinesArm.armToPower(-1, 1.1, 0),
+                                peregrinesArm.clawRotatorToPosition(.45),
+                                peregrinesArm.waitSeconds(4),
+                                peregrinesArm.clawRotatorToPosition(.4),
+                                peregrinesArm.rotatorToPower(600, 0),
+                                peregrinesArm.armToPower(1, .8, 0),
+                                peregrinesArm.waitSeconds(1),
+                                peregrinesArm.clawToPosition(.75),
+                                peregrinesArm.waitSeconds(1),
+                                peregrinesArm.rotatorToPower(4664, 0),
+                                peregrinesArm.waitSeconds(3),
+                                peregrinesArm.clawRotatorToPosition(.45),
+                                peregrinesArm.waitSeconds(1),
+                                peregrinesArm.clawToPosition(0),
+                                peregrinesArm.waitSeconds(2),
+                                peregrinesArm.clawRotatorToPosition(.4),
                                 peregrinesArm.rotatorToPower(600, 0),
                                 peregrinesArm.waitSeconds(3),
                                 peregrinesArm.clawToPosition(.75),
+                                peregrinesArm.waitSeconds(1),
                                 peregrinesArm.rotatorToPower(4664, 0),
                                 peregrinesArm.waitSeconds(3),
-                                peregrinesArm.clawRotatorToPosition(1),
-                                peregrinesArm.waitSeconds(.2),
+                                peregrinesArm.clawRotatorToPosition(.45),
+                                peregrinesArm.waitSeconds(1),
                                 peregrinesArm.clawToPosition(0),
+                                peregrinesArm.waitSeconds(2),
+                                peregrinesArm.clawRotatorToPosition(.4),
                                 peregrinesArm.waitSeconds(2)
                         ),
                         entireAuto

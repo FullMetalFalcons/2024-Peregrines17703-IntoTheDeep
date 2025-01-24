@@ -22,7 +22,7 @@ public class MyClass {
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(-12, 62,Math.toRadians(-90)))
                 .strafeToLinearHeading(new Vector2d(64.5, 55.6), Math.toRadians(265))
                 .waitSeconds(7)
-                .turn(Math.toRadians(-30))
+                //.turn(Math.toRadians(-30))
                 .build());
 
         meepMeep.setBackground(MeepMeep.Background.FIELD_INTO_THE_DEEP_JUICE_DARK)
