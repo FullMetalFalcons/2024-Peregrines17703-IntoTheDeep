@@ -27,8 +27,6 @@ public class CloseSample extends LinearOpMode {
         Action entireAuto;
 
         entireAuto = drive.actionBuilder(drive.pose)
-                .strafeToLinearHeading(new Vector2d(6.1, 46.7), Math.toRadians(265)) //move to bar
-                .waitSeconds(7)
                 .strafeToLinearHeading(new Vector2d(51, 53), Math.toRadians(265))//move to right sample
                 .waitSeconds(3)
                 .strafeToLinearHeading(new Vector2d(63, 56), Math.toRadians(265)) // move to basket
@@ -47,19 +45,10 @@ public class CloseSample extends LinearOpMode {
                 new ParallelAction(
                         peregrinesArm.clawRotatorToPosition(.4),
                         new SequentialAction(
-                                peregrinesArm.rotatorToPower(2355, 0), //arm up
-                                peregrinesArm.clawRotatorToPosition(0.4),
-                                peregrinesArm.waitSeconds(3),
-                                peregrinesArm.armToPower(1, 1.1, 0),
-                                peregrinesArm.waitSeconds(1),
-                                peregrinesArm.clawToPosition(0),
-                                peregrinesArm.rotatorToPower(2000, 0),
-                                peregrinesArm.waitSeconds(1.2),
-                                peregrinesArm.armToPower(-1, 1.1, 0),
-                                peregrinesArm.clawRotatorToPosition(.45),
-                                peregrinesArm.waitSeconds(4),
+                                peregrinesArm.waiSeconds(2),
                                 peregrinesArm.clawRotatorToPosition(.4),
                                 peregrinesArm.rotatorToPower(600, 0),
+                                peregrinesArm.waitSeconds(1.5),
                                 peregrinesArm.armToPower(1, .8, 0),
                                 peregrinesArm.waitSeconds(1),
                                 peregrinesArm.clawToPosition(.75),
