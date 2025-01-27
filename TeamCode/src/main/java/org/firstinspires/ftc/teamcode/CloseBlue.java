@@ -17,7 +17,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 @Config
 @Autonomous
-public class CloseSpecimen extends LinearOpMode {
+public class CloseBlue extends LinearOpMode {
     public void runOpMode() {
 
         PeregrinesArm peregrinesArm = new PeregrinesArm(hardwareMap, telemetry);
