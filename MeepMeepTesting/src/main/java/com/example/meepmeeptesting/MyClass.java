@@ -20,7 +20,7 @@ public class MyClass {
                 .build();
 
         myFirstBot.runAction(myFirstBot.getDrive().actionBuilder(new Pose2d(-12, 62,Math.toRadians(-90)))
-                .strafeToLinearHeading(new Vector2d(64.5, 55.6), Math.toRadians(265))
+                .strafeToLinearHeading(new Vector2d(63, 52), Math.toRadians(265)) //move out a few inches
                 .waitSeconds(7)
                 //.turn(Math.toRadians(-30))
                 .build());

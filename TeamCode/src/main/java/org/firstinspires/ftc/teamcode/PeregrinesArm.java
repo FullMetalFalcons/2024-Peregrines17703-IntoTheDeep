@@ -8,20 +8,9 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.HardwareMap;
-import com.qualcomm.robotcore.hardware.PIDFCoefficients;
-import com.acmerobotics.roadrunner.Pose2d;
 
 import org.firstinspires.ftc.robotcore.external.Telemetry;
-import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 
-import com.acmerobotics.dashboard.config.Config;
-import com.acmerobotics.roadrunner.Action;
-import com.acmerobotics.roadrunner.Pose2d;
-import com.acmerobotics.roadrunner.SequentialAction;
-import com.acmerobotics.roadrunner.Vector2d;
-import com.acmerobotics.roadrunner.ftc.Actions;
-
-import java.text.NumberFormat;
 import java.util.concurrent.TimeUnit;
 
 public class PeregrinesArm {
@@ -31,7 +20,7 @@ public class PeregrinesArm {
     private DcMotorEx Slide;
     private Servo Claw, clawRotator;
 
-    CloseBlue closeBlue = new CloseBlue();
+    CloseSpecimen closeBlue = new CloseSpecimen();
 
     public PeregrinesArm(HardwareMap hardwareMap, Telemetry telemetry1) {
         // Set up motors using MecanumDrive constants

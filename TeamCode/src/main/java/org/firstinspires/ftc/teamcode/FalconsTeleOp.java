@@ -4,11 +4,13 @@ import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
+import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
 public class FalconsTeleOp extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
-    DcMotorEx motorLF, motorRF, motorLB, motorRB;
+    DcMotorEx motorLF, motorRF, motorLB, motorRB, arm, rotator, climb;
+    Servo clawRotator, clawClaw;
     // TODO: Uncomment the following line if you are using servos
     //Servo Claw;
 
@@ -25,6 +27,12 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.leftBackDriveName);
         motorRF = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.rightFrontDriveName);
         motorRB = (DcMotorEx) hardwareMap.dcMotor.get(DRIVE_PARAMS.rightBackDriveName);
+
+        rotator = (DcMotorEx) hardwareMap.dcMotor.get("rotator");
+        arm = (DcMotorEx) hardwareMap.dcMotor.get("parRight");
+        clawClaw = hardwareMap.servo.get("claw");
+        clawRotator = hardwareMap.servo.get("clawRotator");
+        climb = (DcMotorEx) hardwareMap.dcMotor.get("perp");
 
         // Use the following line as a template for defining new servos
         //Claw = (Servo) hardwareMap.servo.get("claw");
@@ -48,9 +56,11 @@ public class FalconsTeleOp extends LinearOpMode {
         motorLB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+        climb.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //This lets you look at encoder values while the OpMode is active
         //If you have a STOP_AND_RESET_ENCODER, make sure to put this below it
+        // GET OUT OF MY HEAD
         motorLF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorLB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
@@ -62,6 +72,7 @@ public class FalconsTeleOp extends LinearOpMode {
 
         // opModeIsActive() returns "true" as long as the Stop button has not been pressed on the Driver Station
         while(opModeIsActive()) {
+            telemetry.addData("Rotator", rotator.getCurrentPosition());
 
             // Mecanum drive code
             double powerX = 0.0;  // Desired power for strafing           (-1 to 1)
@@ -78,6 +89,24 @@ public class FalconsTeleOp extends LinearOpMode {
             double powerLB = -powerX + powerY - powerAng;
             double powerRF = -powerX + powerY + powerAng;
             double powerRB = powerX + powerY + powerAng;
+            double m1 = powerLB / 4;
+            double m2 = powerLB / 4;
+            double m3 = powerRF / 4;
+            double m4 = powerRB / 4;
+            boolean slowMode = gamepad1.right_bumper;
+
+            //these booleans mean that it detects if one of these is pressed and returns true or false depending on if it is or isn't
+            boolean arrrrrrmUp = gamepad2.right_bumper;
+            boolean arrrrrrmDown = gamepad2.left_bumper;
+            boolean rotUp = gamepad2.a;
+            boolean rotDown = gamepad2.b;
+            boolean clawOpen = gamepad2.y;
+            boolean clawClose = gamepad2.x;
+            boolean isOpen = false; // boolean used to check if the claw is open
+            boolean rotatorClawDown = gamepad2.dpad_down;
+            boolean rotatorClawUp = gamepad2.dpad_up;
+            boolean climbOut = gamepad2.dpad_right;
+            boolean climbIn = gamepad2.dpad_left;
 
             // Determine the greatest wheel power and set it to max
             double max = Math.max(1.0, Math.abs(powerLF));
@@ -90,12 +119,33 @@ public class FalconsTeleOp extends LinearOpMode {
             powerLB /= max;
             powerRF /= max;
             powerRB /= max;
+            if (!slowMode)
+            {
+                motorLF.setPower(powerLF);
+                motorLB.setPower(powerLB);
+                motorRF.setPower(powerRF);
+                motorRB.setPower(powerRB);
+            }
+            else if (slowMode)
+            {
+                motorLF.setPower(m1);
+                motorLB.setPower(m2);
+                motorRF.setPower(m3);
+                motorRB.setPower(m4);
+            }
 
-            motorLF.setPower(powerLF);
-            motorLB.setPower(powerLB);
-            motorRF.setPower(powerRF);
-            motorRB.setPower(powerRB);
-
+            if (climbOut)
+            {
+                climb.setPower(1);
+            }
+            else if (climbIn)
+            {
+                climb.setPower(-1);
+            }
+            else
+            {
+                climb.setPower(0);
+            }
 
 
             // If you want to print information to the Driver Station, use telemetry
@@ -104,7 +154,53 @@ public class FalconsTeleOp extends LinearOpMode {
             // update() only needs to be run once and will "push" all of the added data
 
             //telemetry.addData("Label", "Information");
-            //telemetry.update();
+            //telemetry.update()
+
+            //checks if each boolean returns true and if it does it does something
+            if (rotatorClawDown)
+            {
+                clawRotator.setPosition(.2);
+            }
+
+            if (rotatorClawUp)
+            {
+                clawRotator.setPosition(.9);
+            }
+
+            if (clawOpen)
+            {
+                clawClaw.setPosition(0);
+            }
+
+            if (clawClose)
+            {
+                clawClaw.setPosition(.75);
+            }
+
+            if (arrrrrrmUp)
+            {
+                arm.setPower(1); //Motors use setPower from a value 0-1
+            }
+            else if (arrrrrrmDown)
+            {
+                arm.setPower(-1);
+            }
+            else {
+                arm.setPower(0);
+            }
+
+            if (rotUp)
+            {
+                rotator.setPower(1);
+                //rotator.setTargetPosition(4644);
+            }
+            else if (rotDown)
+            {
+                rotator.setPower(-1);
+            }
+            else {
+                rotator.setPower(0);
+            }
 
         } // opModeActive loop ends
     }

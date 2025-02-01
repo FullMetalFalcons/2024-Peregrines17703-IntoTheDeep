@@ -12,13 +12,11 @@ import com.acmerobotics.roadrunner.ftc.Actions;
 // Regular FTC Imports
 import com.qualcomm.robotcore.eventloop.opmode.Autonomous;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
-import com.qualcomm.robotcore.hardware.DcMotorEx;
 
 
 @Config
 @Autonomous
-public class
-CloseBlue extends LinearOpMode {
+public class CloseSpecimen extends LinearOpMode {
     public void runOpMode() {
 
         PeregrinesArm peregrinesArm = new PeregrinesArm(hardwareMap, telemetry);
