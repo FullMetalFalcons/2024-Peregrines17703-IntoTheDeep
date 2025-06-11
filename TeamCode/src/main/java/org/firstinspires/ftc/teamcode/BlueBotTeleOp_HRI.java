@@ -15,6 +15,27 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     // Multiplication factor for slow drive mode
     final double SLOW_MODE_FACTOR = 0.25;
 
+    // Test mode variables
+    boolean testModeActive = false;
+    boolean testModeToggleRequested;
+    boolean lastTestModeToggleRequested = false;
+
+    int testModeIndexMin = 1;
+    int testModeIndexMax = 8;
+    int testModeIndex = testModeIndexMin;
+
+    boolean testModeIncrement;
+    boolean lastTestModeIncrement = false;
+    boolean testModeDecrement;
+    boolean lastTestModeDecrement = false;
+
+    double testModeControlValue;
+    double testModeControlStick;
+
+    double testModeReportedPosition;
+    String testModeMotorName;
+
+
     // Servo position constants
     final double MAIN_CLAW_OPEN = 0.0;
     final double MAIN_CLAW_CLOSED = 0.0;
@@ -140,6 +161,86 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             motorRB.setPower(powerRB);
 
 
+            // Test Mode code
+            testModeToggleRequested = (gamepad2.start && gamepad2.back);
+            if (testModeToggleRequested && !lastTestModeToggleRequested) {
+                // Switch between test mode and regular mode using "Start + Back"
+                testModeActive = !testModeActive;
+            }
+            lastTestModeToggleRequested = testModeToggleRequested;
+
+            if (testModeActive) {
+                // Joystick down becomes 0.0, up becomes 1.0
+                testModeControlStick = -gamepad2.right_stick_y;
+                testModeControlValue = (1 + testModeControlStick) /2;
+
+                switch (testModeIndex) {
+                    case 1:
+                        testModeMotorName = "Main Claw";
+                        MainClaw.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 2:
+                        testModeMotorName = "Main Wrist";
+                        MainWrist.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 3:
+                        testModeMotorName = "Wall Claw";
+                        WallClaw.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 4:
+                        testModeMotorName = "Wall Wrist";
+                        WallWrist.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 5:
+                        testModeMotorName = "Left Wall Arm";
+                        WallArmL.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 6:
+                        testModeMotorName = "Right Wall Arm";
+                        WallArmR.setPosition(testModeControlValue);
+                        testModeReportedPosition = testModeControlValue;
+                        break;
+                    case 7:
+                        testModeMotorName = "Viper Slide";
+                        Slide.setPower(testModeControlStick);
+                        testModeReportedPosition = Slide.getCurrentPosition();
+                        break;
+                    case 8:
+                        testModeMotorName = "Slide Rotator";
+                        SlideRotator.setPower(testModeControlStick);
+                        testModeReportedPosition = SlideRotator.getCurrentPosition();
+                        break;
+                }
+
+                // Change controlled motor
+                testModeIncrement = gamepad2.dpad_up;
+                testModeDecrement = gamepad2.dpad_down;
+
+                if (testModeIncrement && !lastTestModeIncrement) {
+                    testModeIndex += 1;
+                    // (condition ? true value : false value)
+                    testModeIndex = (testModeIndex > testModeIndexMax ? testModeIndexMin : testModeIndex);
+                }
+                if (testModeDecrement && !lastTestModeDecrement) {
+                    testModeIndex -= 1;
+                    // (condition ? true value : false value)
+                    testModeIndex = (testModeIndex < testModeIndexMin ? testModeIndexMax : testModeIndex);
+                }
+                lastTestModeIncrement = testModeIncrement;
+                lastTestModeDecrement = testModeDecrement;
+
+
+                // Write the name of the controlled motor/servo and its position to telemetry
+                telemetry.addData(testModeMotorName + " position", testModeReportedPosition);
+            }
+
+
+
             if (gamepad2.y) {
                 wallGrabHandOffRoutine();
             }
@@ -150,8 +251,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             //     the variable that you list after the comma will be displayed next to the label
             // update() only needs to be run once and will "push" all of the added data
 
-            //telemetry.addData("Label", "Information");
-            //telemetry.update()
+            telemetry.update();
 
 
         } // opModeActive loop ends
