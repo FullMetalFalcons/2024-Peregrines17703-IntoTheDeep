@@ -22,7 +22,7 @@ public class CloseSample extends LinearOpMode {
 
         PeregrinesArm peregrinesArm = new PeregrinesArm(hardwareMap, telemetry);
 
-        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(34.6, 63.3, Math.toRadians(-90)));
+        MecanumDrive drive = new MecanumDrive(hardwareMap, new Pose2d(38.5, 63.3, Math.toRadians(-90)));
 
         Action entireAuto;
 

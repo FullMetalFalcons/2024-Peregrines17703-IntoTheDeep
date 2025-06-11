@@ -89,10 +89,6 @@ public class FalconsTeleOp extends LinearOpMode {
             double powerLB = -powerX + powerY - powerAng;
             double powerRF = -powerX + powerY + powerAng;
             double powerRB = powerX + powerY + powerAng;
-            double m1 = powerLB / 4;
-            double m2 = powerLB / 4;
-            double m3 = powerRF / 4;
-            double m4 = powerRB / 4;
             boolean slowMode = gamepad1.right_bumper;
 
             //these booleans mean that it detects if one of these is pressed and returns true or false depending on if it is or isn't
@@ -119,15 +115,18 @@ public class FalconsTeleOp extends LinearOpMode {
             powerLB /= max;
             powerRF /= max;
             powerRB /= max;
-            if (!slowMode)
-            {
+
+            double m1 = powerLB / 4;
+            double m2 = powerLB / 4;
+            double m3 = powerRF / 4;
+            double m4 = powerRB / 4;
+
+            if (!slowMode) {
                 motorLF.setPower(powerLF);
                 motorLB.setPower(powerLB);
                 motorRF.setPower(powerRF);
                 motorRB.setPower(powerRB);
-            }
-            else if (slowMode)
-            {
+            } else {
                 motorLF.setPower(m1);
                 motorLB.setPower(m2);
                 motorRF.setPower(m3);
