@@ -70,11 +70,17 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         motorRF.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
         motorRB.setMode(DcMotorEx.RunMode.STOP_AND_RESET_ENCODER);
 
+        Slide.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+        SlideRotator.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
+
         //This makes the wheels tense up and stay in position when it is not moving, opposite is FLOAT
         motorLF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorLB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRF.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
         motorRB.setZeroPowerBehavior(DcMotorEx.ZeroPowerBehavior.BRAKE);
+
+        Slide.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
+        SlideRotator.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         //This lets you look at encoder values while the OpMode is active
         //If you have a STOP_AND_RESET_ENCODER, make sure to put this below it
@@ -82,6 +88,9 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         motorLB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRF.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         motorRB.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+
+        Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        SlideRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
 
         // The program will pause here until the Play icon is pressed on the Driver Station
@@ -131,6 +140,11 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             motorRB.setPower(powerRB);
 
 
+            if (gamepad2.y) {
+                wallGrabHandOffRoutine();
+            }
+
+
             // If you want to print information to the Driver Station, use telemetry
             // addData() lets you give a string which is automatically followed by a ":" when printed
             //     the variable that you list after the comma will be displayed next to the label
@@ -142,4 +156,56 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
         } // opModeActive loop ends
     }
+
+    // Functions are defined here
+    public void wallGrabHandOffRoutine() {
+        // Prepare the wall attachment for picking up a specimen
+        WallArmL.setPosition(WALL_ARM_LEFT_DOWN);
+        WallArmR.setPosition(WALL_ARM_RIGHT_DOWN);
+        WallWrist.setPosition(WALL_WRIST_PICK_UP_POSITION);
+        WallClaw.setPosition(WALL_CLAW_OPEN);
+
+        // Slowly drive backwards into the wall until the button is released
+        while (gamepad2.y) {
+            powerAllDriveMotors(-0.2);
+        }
+
+        // Stop driving and grab the specimen
+        powerAllDriveMotors(0.0);
+        WallClaw.setPosition(WALL_CLAW_CLOSED);
+        sleep(100);
+
+        // Move everything into hand-off positions
+        WallArmL.setPosition(WALL_ARM_LEFT_UP);
+        WallArmR.setPosition(WALL_ARM_RIGHT_UP);
+        MainClaw.setPosition(MAIN_CLAW_OPEN);
+        MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
+        Slide.setTargetPosition(0);
+        SlideRotator.setTargetPosition(0);
+        Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        SlideRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        // Pause so that the Wall Wrist doesn't try to turn down into the wall
+        sleep(1000);
+        WallWrist.setPosition(WALL_WRIST_HAND_OFF_POSITION);
+
+        // Wait for the motors to finish moving
+        while (Slide.isBusy() || SlideRotator.isBusy()) {}
+        sleep(100);
+
+        // Perform the hand-off
+        MainClaw.setPosition(MAIN_CLAW_CLOSED);
+        sleep(100);
+        WallClaw.setPosition(WALL_CLAW_OPEN);
+        sleep(100);
+        MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
+    }
+
+    public void powerAllDriveMotors(double desiredPower) {
+        motorLF.setPower(desiredPower);
+        motorLB.setPower(desiredPower);
+        motorRF.setPower(desiredPower);
+        motorRB.setPower(desiredPower);
+    }
+
+
 } // end class
