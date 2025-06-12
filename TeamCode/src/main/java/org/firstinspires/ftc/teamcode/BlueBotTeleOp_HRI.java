@@ -14,7 +14,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     Servo MainClaw, MainWrist, WallClaw, WallWrist, WallArmL, WallArmR;
 
     // Multiplication factor for slow drive mode
-    final double SLOW_MODE_FACTOR = 0.25;
+    final double SLOW_MODE_FACTOR = 0.001;
 
     // Test mode variables
     boolean testModeActive = false;
@@ -38,25 +38,26 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
 
     // Servo position constants
-    final double MAIN_CLAW_OPEN = 0.0;
-    final double MAIN_CLAW_CLOSED = 0.0;
-    final double MAIN_WRIST_HAND_OFF_POSITION = 0.0;
-    final double MAIN_WRIST_SCORE_POSITION = 0.0;
-    final double MAIN_WRIST_FLOOR_POSITION = 0.0;
+    final double MAIN_CLAW_OPEN = 0.5;
+    final double MAIN_CLAW_CLOSED = 0.8;
+    final double MAIN_WRIST_HAND_OFF_POSITION = 0.7;
+    final double MAIN_WRIST_SCORE_POSITION = 0.5;
+    final double MAIN_WRIST_FLOOR_POSITION = 0.1;
 
-    final double WALL_CLAW_OPEN = 0.0;
-    final double WALL_CLAW_CLOSED = 0.0;
-    final double WALL_WRIST_HAND_OFF_POSITION = 0.0;
-    final double WALL_WRIST_PICK_UP_POSITION = 0.0;
+    final double WALL_CLAW_OPEN = 0.8;
+    final double WALL_CLAW_CLOSED = 1.0;
+    final double WALL_WRIST_HAND_OFF_POSITION = 0.6;
+    final double WALL_WRIST_PICK_UP_POSITION = 0.9;
 
-    final double WALL_ARM_LEFT_DOWN = 0.0;
-    final double WALL_ARM_LEFT_UP = 0.0;
-    final double WALL_ARM_RIGHT_DOWN = 0.0;
-    final double WALL_ARM_RIGHT_UP = 0.0;
+    //final double WALL_ARM_LEFT_DOWN = 0.7;
+    //final double WALL_ARM_LEFT_UP = 0.5;
+    //final double WALL_ARM_RIGHT_DOWN = 0.0;
+    //final double WALL_ARM_RIGHT_UP = 0.0;
 
 
     // Other control variables
     boolean lastWristPressed = false;
+    boolean wristAtFloor = false;
 
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
 
@@ -259,7 +260,8 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
                 // Control the main wrist
                 if (gamepad2.right_trigger > 0 && !lastWristPressed) {
                     // Toggle the position from "floor" to "score"
-                    if (MainWrist.getPosition() == MAIN_WRIST_FLOOR_POSITION) {
+                    wristAtFloor = !wristAtFloor;
+                    if (wristAtFloor) {
                         MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
                     } else {
                         MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
@@ -294,8 +296,8 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     // Functions are defined here
     public void wallGrabHandOffRoutine() {
         // Prepare the wall attachment for picking up a specimen
-        WallArmL.setPosition(WALL_ARM_LEFT_DOWN);
-        WallArmR.setPosition(WALL_ARM_RIGHT_DOWN);
+        //WallArmL.setPosition(WALL_ARM_LEFT_DOWN);
+        //WallArmR.setPosition(WALL_ARM_RIGHT_DOWN);
         WallWrist.setPosition(WALL_WRIST_PICK_UP_POSITION);
         WallClaw.setPosition(WALL_CLAW_OPEN);
         Slide.setPower(0);
@@ -303,36 +305,43 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
         // Slowly drive backwards into the wall until the button is released
         while (gamepad2.y) {
-            powerAllDriveMotors(-0.2);
+            powerAllDriveMotors(-0.05);
         }
 
         // Stop driving and grab the specimen
         powerAllDriveMotors(0.0);
         WallClaw.setPosition(WALL_CLAW_CLOSED);
-        sleep(100);
+        sleep(1000);
 
         // Move everything into hand-off positions
-        WallArmL.setPosition(WALL_ARM_LEFT_UP);
-        WallArmR.setPosition(WALL_ARM_RIGHT_UP);
+        //WallArmL.setPosition(WALL_ARM_LEFT_UP);
+        //WallArmR.setPosition(WALL_ARM_RIGHT_UP);
+        powerAllDriveMotors(0.08);
+        WallWrist.setPosition(WALL_WRIST_HAND_OFF_POSITION);
         MainClaw.setPosition(MAIN_CLAW_OPEN);
         MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
         Slide.setTargetPosition(0);
         SlideRotator.setTargetPosition(0);
         Slide.setMode(DcMotor.RunMode.RUN_TO_POSITION);
         SlideRotator.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-        // Pause so that the Wall Wrist doesn't try to turn down into the wall
-        sleep(1000);
-        WallWrist.setPosition(WALL_WRIST_HAND_OFF_POSITION);
+        // Pause to drive away from the wall
+        sleep(500);
+        powerAllDriveMotors(0.0);
 
         // Wait for the motors to finish moving
-        while (Slide.isBusy() || SlideRotator.isBusy()) {}
-        sleep(100);
+        while (Slide.isBusy() || SlideRotator.isBusy()) {
+            Slide.setPower(1);
+            SlideRotator.setPower(1);
+        }
+        Slide.setPower(0);
+        SlideRotator.setPower(0);
+        sleep(1000);
 
         // Perform the hand-off
         MainClaw.setPosition(MAIN_CLAW_CLOSED);
-        sleep(100);
+        sleep(1000);
         WallClaw.setPosition(WALL_CLAW_OPEN);
-        sleep(100);
+        sleep(500);
         MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
 
         // Set slide motors back to manual mode
