@@ -22,7 +22,7 @@ public class TestAuto extends LinearOpMode {
         Action turnTrajectory;
         Action strafeTrajectory;
 
-        turnTrajectory = drive.actionBuilder(drive.pose)
+        turnTrajectory = drive.actionBuilder(drive.localizer.getPose())
                 .lineToY(24)
                 .turn(Math.toRadians(90))
                 .lineToX(-24)
@@ -34,7 +34,7 @@ public class TestAuto extends LinearOpMode {
                 .turnTo(Math.toRadians(90))
                 .build();
 
-        strafeTrajectory = drive.actionBuilder(drive.pose)
+        strafeTrajectory = drive.actionBuilder(drive.localizer.getPose())
                 .strafeTo(new Vector2d(0, 24))
                 .strafeTo(new Vector2d(-24, 24))
                 .strafeTo(new Vector2d(-24, 0))

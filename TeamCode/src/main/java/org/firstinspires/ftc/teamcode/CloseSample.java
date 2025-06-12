@@ -26,7 +26,7 @@ public class CloseSample extends LinearOpMode {
 
         Action entireAuto;
 
-        entireAuto = drive.actionBuilder(drive.pose)
+        entireAuto = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(63, 56), Math.toRadians(265))
                 .waitSeconds(5)
                 .strafeToLinearHeading(new Vector2d(52, 51), Math.toRadians(265))//move to right sample

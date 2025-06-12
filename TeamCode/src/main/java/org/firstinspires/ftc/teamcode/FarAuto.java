@@ -26,7 +26,7 @@ public class FarAuto extends LinearOpMode {
 
         Action entireAuto;
 
-        entireAuto = drive.actionBuilder(drive.pose)
+        entireAuto = drive.actionBuilder(drive.localizer.getPose())
                 .build();
 
         waitForStart();

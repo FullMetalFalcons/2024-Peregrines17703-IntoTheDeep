@@ -25,7 +25,7 @@ public class CloseSpecimen extends LinearOpMode {
 
         Action entireAuto;
 
-        entireAuto = drive.actionBuilder(drive.pose)
+        entireAuto = drive.actionBuilder(drive.localizer.getPose())
                 .strafeToLinearHeading(new Vector2d(6.1, 46.7), Math.toRadians(265)) //move to bar
                 .waitSeconds(5.5)
                 .strafeToLinearHeading(new Vector2d(51, 53), Math.toRadians(265))//move to right sample
