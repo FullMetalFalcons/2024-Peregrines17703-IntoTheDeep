@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
+import com.sun.tools.javac.Main;
 
 @TeleOp
 public class BlueBotTeleOp_HRI extends LinearOpMode {
@@ -52,6 +53,10 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     final double WALL_ARM_LEFT_UP = 0.0;
     final double WALL_ARM_RIGHT_DOWN = 0.0;
     final double WALL_ARM_RIGHT_UP = 0.0;
+
+
+    // Other control variables
+    boolean lastWristPressed = false;
 
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
 
@@ -237,13 +242,42 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
                 // Write the name of the controlled motor/servo and its position to telemetry
                 telemetry.addData(testModeMotorName + " position", testModeReportedPosition);
+
+            } else {
+
+                // Manually control the viper slide
+                SlideRotator.setPower(-gamepad2.left_stick_y);
+                Slide.setPower(-gamepad2.right_stick_y);
+
+                // Control the main claw
+                if (gamepad2.right_bumper) {
+                    MainClaw.setPosition(MAIN_CLAW_OPEN);
+                } else {
+                    MainClaw.setPosition(MAIN_CLAW_CLOSED);
+                }
+
+                // Control the main wrist
+                if (gamepad2.right_trigger > 0 && !lastWristPressed) {
+                    // Toggle the position from "floor" to "score"
+                    if (MainWrist.getPosition() == MAIN_WRIST_FLOOR_POSITION) {
+                        MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
+                    } else {
+                        MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
+                    }
+                }
+                lastWristPressed = (gamepad2.right_trigger > 0);
+
+                // Initiate the wall pick-up sequence
+                if (gamepad2.y) {
+                    wallGrabHandOffRoutine();
+                }
+
+
+
+
+
             }
 
-
-
-            if (gamepad2.y) {
-                wallGrabHandOffRoutine();
-            }
 
 
             // If you want to print information to the Driver Station, use telemetry
@@ -264,6 +298,8 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         WallArmR.setPosition(WALL_ARM_RIGHT_DOWN);
         WallWrist.setPosition(WALL_WRIST_PICK_UP_POSITION);
         WallClaw.setPosition(WALL_CLAW_OPEN);
+        Slide.setPower(0);
+        SlideRotator.setPower(0);
 
         // Slowly drive backwards into the wall until the button is released
         while (gamepad2.y) {
@@ -298,6 +334,10 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         WallClaw.setPosition(WALL_CLAW_OPEN);
         sleep(100);
         MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
+
+        // Set slide motors back to manual mode
+        Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
+        SlideRotator.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
     }
 
     public void powerAllDriveMotors(double desiredPower) {
