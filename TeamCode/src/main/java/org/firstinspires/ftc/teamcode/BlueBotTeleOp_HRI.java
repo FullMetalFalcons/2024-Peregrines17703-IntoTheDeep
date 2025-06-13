@@ -5,13 +5,12 @@ import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
 import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
-import com.sun.tools.javac.Main;
 
 @TeleOp
 public class BlueBotTeleOp_HRI extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
     DcMotorEx motorLF, motorRF, motorLB, motorRB, Slide, SlideRotator;
-    Servo MainClaw, MainWrist, WallClaw, WallWrist, WallArmL, WallArmR;
+    Servo MainClaw, MainWrist, WallClaw, WallWrist;
 
     // Multiplication factor for slow drive mode
     final double SLOW_MODE_FACTOR = 0.005;
@@ -49,21 +48,34 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     final double WALL_WRIST_HAND_OFF_POSITION = 0.65;
     final double WALL_WRIST_PICK_UP_POSITION = 0.8;
 
-    //final double WALL_ARM_LEFT_DOWN = 0.7;
-    //final double WALL_ARM_LEFT_UP = 0.5;
-    //final double WALL_ARM_RIGHT_DOWN = 0.0;
-    //final double WALL_ARM_RIGHT_UP = 0.0;
-
 
     // Other control variables
     boolean lastWristPressed = false;
-    boolean wristAtFloor = false;
+    boolean wristAtFloor = true;
 
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
+
+    public GoBildaPinpointDriver driver;
+    public GoBildaPinpointDriver.EncoderDirection initialParDirection, initialPerpDirection;
+    double headingRadians;
 
 
     // The following code will run as soon as "INIT" is pressed on the Driver Station
     public void runOpMode() {
+        // Setup pinpoint driver
+        driver = hardwareMap.get(GoBildaPinpointDriver.class, "pinpoint");
+
+        double mmPerTick = 25.4 * DRIVE_PARAMS.inPerTick;
+        driver.setEncoderResolution(1 / mmPerTick);
+        driver.setOffsets(0, 0); // TODO:  Set actual offsets in mm
+
+        // TODO: reverse encoder directions if needed
+        // Forward and Left are both positive
+        initialParDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        initialPerpDirection = GoBildaPinpointDriver.EncoderDirection.FORWARD;
+        driver.setEncoderDirections(initialParDirection, initialPerpDirection);
+
+        driver.resetPosAndIMU();
 
         // Define drive motors
         //The string should be the name on the Driver Hub
@@ -81,8 +93,6 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         MainWrist = (Servo) hardwareMap.servo.get("mainWrist");
         WallClaw = (Servo) hardwareMap.servo.get("wallClaw");
         WallWrist = (Servo) hardwareMap.servo.get("wallWrist");
-        //WallArmL = (Servo) hardwareMap.servo.get("wallArmLeft");
-        //WallArmR = (Servo) hardwareMap.servo.get("wallArmRight");
 
         //This reverses the motor direction
         // This data is also set at the top of MecanumDrive, for the same reasons as above
@@ -126,21 +136,24 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         // opModeIsActive() returns "true" as long as the Stop button has not been pressed on the Driver Station
         while(opModeIsActive()) {
 
-            // Mecanum drive code
-            double powerX = 0.0;  // Desired power for strafing           (-1 to 1)
-            double powerY = 0.0;  // Desired power for forward/backward   (-1 to 1)
-            double powerAng = 0.0;  // Desired power for turning          (-1 to 1)
+            // Field centric drive code
+            // Get heading of the robot from pinpoint driver
+            driver.update();
+            headingRadians = driver.getHeading();
 
             // Set the desired powers based on joystick inputs (-1 to 1)
-            powerX = gamepad1.left_stick_x;
-            powerY = -gamepad1.left_stick_y;
-            powerAng = -gamepad1.right_stick_x;
+            double desiredForward = -gamepad1.left_stick_y;
+            double desiredStrafe = gamepad1.left_stick_x;
+            double powerAng = -gamepad1.right_stick_x;
+
+            double powerForward = (desiredForward * Math.cos(headingRadians)) + (desiredStrafe * Math.sin(headingRadians));
+            double powerStrafe = (desiredStrafe * Math.cos(headingRadians)) - (desiredForward * Math.sin(headingRadians));
 
             // Perform vector math to determine the desired powers for each wheel
-            double powerLF = powerX + powerY - powerAng;
-            double powerLB = -powerX + powerY - powerAng;
-            double powerRF = -powerX + powerY + powerAng;
-            double powerRB = powerX + powerY + powerAng;
+            double powerLF = powerStrafe + powerForward - powerAng;
+            double powerLB = -powerStrafe + powerForward - powerAng;
+            double powerRF = -powerStrafe + powerForward + powerAng;
+            double powerRB = powerStrafe + powerForward + powerAng;
 
             // Determine the greatest wheel power and set it to max
             double max = Math.max(1.0, Math.abs(powerLF));
@@ -167,7 +180,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             motorRB.setPower(powerRB);
 
 
-            // Test Mode code
+            // Test Mode (AKA Debug Mode) code
             testModeToggleRequested = (gamepad2.start && gamepad2.back);
             if (testModeToggleRequested && !lastTestModeToggleRequested) {
                 // Switch between test mode and regular mode using "Start + Back"
@@ -202,13 +215,13 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
                         testModeReportedPosition = testModeControlValue;
                         break;
                     case 5:
-                        testModeMotorName = "Left Wall Arm";
-                        WallArmL.setPosition(testModeControlValue);
+                        testModeMotorName = "Left Wall Arm (None)";
+                        //WallArmL.setPosition(testModeControlValue);
                         testModeReportedPosition = testModeControlValue;
                         break;
                     case 6:
-                        testModeMotorName = "Right Wall Arm";
-                        WallArmR.setPosition(testModeControlValue);
+                        testModeMotorName = "Right Wall Arm (None)";
+                        //WallArmR.setPosition(testModeControlValue);
                         testModeReportedPosition = testModeControlValue;
                         break;
                     case 7:
@@ -261,20 +274,19 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
                 if (gamepad2.right_trigger > 0 && !lastWristPressed) {
                     // Toggle the position from "floor" to "score"
                     wristAtFloor = !wristAtFloor;
-                    if (wristAtFloor) {
-                        MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
-                    } else {
-                        MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
-                    }
+                }
+                if (wristAtFloor) {
+                    MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
+                } else {
+                    MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
                 }
                 lastWristPressed = (gamepad2.right_trigger > 0);
+
 
                 // Initiate the wall pick-up sequence
                 if (gamepad2.y) {
                     wallGrabHandOffRoutine();
                 }
-
-
 
 
 
@@ -328,8 +340,8 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         sleep(500);
         powerAllDriveMotors(0.0);
 
-        // Wait for the motors to finish moving
-        while (Slide.isBusy() || SlideRotator.isBusy()) {
+        // Wait for the motors to finish moving (or Y is pressed to cancel it)
+        while (Slide.isBusy() || SlideRotator.isBusy() || gamepad2.y) {
             Slide.setPower(1);
             SlideRotator.setPower(1);
         }
