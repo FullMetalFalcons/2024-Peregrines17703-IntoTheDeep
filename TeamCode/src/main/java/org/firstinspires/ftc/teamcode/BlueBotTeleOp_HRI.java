@@ -12,8 +12,13 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     DcMotorEx motorLF, motorRF, motorLB, motorRB, Slide, SlideRotator;
     Servo MainClaw, MainWrist, WallClaw, WallWrist;
 
-    // Multiplication factor for slow drive mode
-    final double SLOW_MODE_FACTOR = 0.005;
+    // Drive variables
+    final double REGULAR_DRIVE_FACTOR = 0.5;
+    final double SLOW_MODE_FACTOR = 0.1;
+    double powerLF; // Powers initialized here so that they can
+    double powerLB; //   be referenced in a function below
+    double powerRF;
+    double powerRB;
 
     // Test mode variables
     boolean testModeActive = false;
@@ -40,7 +45,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     final double MAIN_CLAW_OPEN = 0.5;
     final double MAIN_CLAW_CLOSED = 0.8;
     final double MAIN_WRIST_HAND_OFF_POSITION = 0.75;
-    //final double MAIN_WRIST_SCORE_POSITION = 0.5;
+    //     final double MAIN_WRIST_SCORE_POSITION = 0.5;
     final double MAIN_WRIST_FLOOR_POSITION = 0.1;
 
     final double WALL_CLAW_OPEN = 0.8;
@@ -53,6 +58,13 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     boolean lastWristPressed = false;
     boolean wristAtFloor = true;
 
+    final double SLIDE_LIMIT_TICKS = 880;
+    final double ROTATOR_STRAIGHT_UP_THRESHOLD_TICKS = 10;
+
+    double desiredPower;
+
+
+    // Access MecanumDrive and PinpointDriver for drive wheel/heading information
     public static MecanumDrive.Params DRIVE_PARAMS = new MecanumDrive.Params();
 
     public GoBildaPinpointDriver driver;
@@ -67,7 +79,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
         double mmPerTick = 25.4 * DRIVE_PARAMS.inPerTick;
         driver.setEncoderResolution(1 / mmPerTick);
-        driver.setOffsets(0, 0); // TODO:  Set actual offsets in mm
+        driver.setOffsets(0, 0); // TODO:  Set actual offsets, in mm
 
         // TODO: reverse encoder directions if needed
         // Forward and Left are both positive
@@ -139,7 +151,9 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             // Field centric drive code
             // Get heading of the robot from pinpoint driver
             driver.update();
-            headingRadians = driver.getHeading();
+            headingRadians = -driver.getHeading();
+
+            telemetry.addData("Robot heading", Math.toDegrees(headingRadians));
 
             // Set the desired powers based on joystick inputs (-1 to 1)
             double desiredForward = -gamepad1.left_stick_y;
@@ -150,10 +164,10 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             double powerStrafe = (desiredStrafe * Math.cos(headingRadians)) - (desiredForward * Math.sin(headingRadians));
 
             // Perform vector math to determine the desired powers for each wheel
-            double powerLF = powerStrafe + powerForward - powerAng;
-            double powerLB = -powerStrafe + powerForward - powerAng;
-            double powerRF = -powerStrafe + powerForward + powerAng;
-            double powerRB = powerStrafe + powerForward + powerAng;
+            powerLF = powerStrafe + powerForward - powerAng;
+            powerLB = -powerStrafe + powerForward - powerAng;
+            powerRF = -powerStrafe + powerForward + powerAng;
+            powerRB = powerStrafe + powerForward + powerAng;
 
             // Determine the greatest wheel power and set it to max
             double max = Math.max(1.0, Math.abs(powerLF));
@@ -168,10 +182,9 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             powerRB /= max;
 
             if (gamepad1.right_bumper) {
-                powerLF *= SLOW_MODE_FACTOR;
-                powerLB *= SLOW_MODE_FACTOR;
-                powerRF *= SLOW_MODE_FACTOR;
-                powerRB *= SLOW_MODE_FACTOR;
+                scaleDrivePowersByFactor(SLOW_MODE_FACTOR);
+            } else {
+                scaleDrivePowersByFactor(REGULAR_DRIVE_FACTOR);
             }
 
             motorLF.setPower(powerLF);
@@ -260,8 +273,13 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
             } else {
 
                 // Manually control the viper slide
-                SlideRotator.setPower(-gamepad2.left_stick_y);
-                Slide.setPower(-gamepad2.right_stick_y);
+                SlideRotator.setPower(-gamepad2.left_stick_y / 2);
+                desiredPower = -gamepad2.right_stick_y;
+                if (canMoveSlide(desiredPower)) {
+                    Slide.setPower(desiredPower);
+                } else {
+                    Slide.setPower(0);
+                }
 
                 // Control the main claw
                 if (gamepad2.right_bumper) {
@@ -276,9 +294,9 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
                     wristAtFloor = !wristAtFloor;
                 }
                 if (wristAtFloor) {
-                    MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
-                } else {
                     MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
+                } else {
+                    MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
                 }
                 lastWristPressed = (gamepad2.right_trigger > 0);
 
@@ -365,6 +383,47 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         motorLB.setPower(desiredPower);
         motorRF.setPower(desiredPower);
         motorRB.setPower(desiredPower);
+    }
+
+    public void scaleDrivePowersByFactor(double factor) {
+        powerLF *= factor;
+        powerLB *= factor;
+        powerRF *= factor;
+        powerRB *= factor;
+    }
+
+    public boolean canMoveSlide(double desiredPower) {
+        if (desiredPower > 0 && Slide.getCurrentPosition() > SLIDE_LIMIT_TICKS - 30) {
+            return false;
+        } else {
+            return true;
+        }
+        /*
+        if (desiredPower > 0) {
+            // Trying to extend; check rotation
+            // If the rotator is at 0-10 ticks, it is mostly upright
+            if (SlideRotator.getCurrentPosition() < ROTATOR_STRAIGHT_UP_THRESHOLD_TICKS) {
+                // Rotator is straight up. No limits on Slide
+                return true;
+            } else {
+                // Rotator is down. Slide can only extend up to 880 ticks (with buffer)
+                return Slide.getCurrentPosition() < LOWERED_SLIDE_LIMIT_TICKS - 30;
+            }
+        } else {
+            // Trying to retract; no need for limits
+            return true;
+        }
+         */
+    }
+
+    public boolean canMoveRotator(double desiredPower) {
+        if (desiredPower > 0) {
+            // Trying to rotate down; check slide position
+            return (Slide.getCurrentPosition() < SLIDE_LIMIT_TICKS);
+        } else {
+            // Trying to rotate up; no need for limits
+            return true;
+        }
     }
 
 
