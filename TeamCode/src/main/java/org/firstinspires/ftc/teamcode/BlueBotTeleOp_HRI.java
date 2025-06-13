@@ -14,7 +14,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     Servo MainClaw, MainWrist, WallClaw, WallWrist, WallArmL, WallArmR;
 
     // Multiplication factor for slow drive mode
-    final double SLOW_MODE_FACTOR = 0.001;
+    final double SLOW_MODE_FACTOR = 0.005;
 
     // Test mode variables
     boolean testModeActive = false;
@@ -40,14 +40,14 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     // Servo position constants
     final double MAIN_CLAW_OPEN = 0.5;
     final double MAIN_CLAW_CLOSED = 0.8;
-    final double MAIN_WRIST_HAND_OFF_POSITION = 0.7;
-    final double MAIN_WRIST_SCORE_POSITION = 0.5;
+    final double MAIN_WRIST_HAND_OFF_POSITION = 0.75;
+    //final double MAIN_WRIST_SCORE_POSITION = 0.5;
     final double MAIN_WRIST_FLOOR_POSITION = 0.1;
 
     final double WALL_CLAW_OPEN = 0.8;
     final double WALL_CLAW_CLOSED = 1.0;
-    final double WALL_WRIST_HAND_OFF_POSITION = 0.6;
-    final double WALL_WRIST_PICK_UP_POSITION = 0.9;
+    final double WALL_WRIST_HAND_OFF_POSITION = 0.65;
+    final double WALL_WRIST_PICK_UP_POSITION = 0.8;
 
     //final double WALL_ARM_LEFT_DOWN = 0.7;
     //final double WALL_ARM_LEFT_UP = 0.5;
@@ -81,8 +81,8 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
         MainWrist = (Servo) hardwareMap.servo.get("mainWrist");
         WallClaw = (Servo) hardwareMap.servo.get("wallClaw");
         WallWrist = (Servo) hardwareMap.servo.get("wallWrist");
-        WallArmL = (Servo) hardwareMap.servo.get("wallArmLeft");
-        WallArmR = (Servo) hardwareMap.servo.get("wallArmRight");
+        //WallArmL = (Servo) hardwareMap.servo.get("wallArmLeft");
+        //WallArmR = (Servo) hardwareMap.servo.get("wallArmRight");
 
         //This reverses the motor direction
         // This data is also set at the top of MecanumDrive, for the same reasons as above
@@ -262,7 +262,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
                     // Toggle the position from "floor" to "score"
                     wristAtFloor = !wristAtFloor;
                     if (wristAtFloor) {
-                        MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
+                        MainWrist.setPosition(MAIN_WRIST_HAND_OFF_POSITION);
                     } else {
                         MainWrist.setPosition(MAIN_WRIST_FLOOR_POSITION);
                     }
@@ -339,10 +339,9 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
 
         // Perform the hand-off
         MainClaw.setPosition(MAIN_CLAW_CLOSED);
-        sleep(1000);
-        WallClaw.setPosition(WALL_CLAW_OPEN);
         sleep(500);
-        MainWrist.setPosition(MAIN_WRIST_SCORE_POSITION);
+        WallClaw.setPosition(WALL_CLAW_OPEN);
+        WallWrist.setPosition(WALL_WRIST_PICK_UP_POSITION);
 
         // Set slide motors back to manual mode
         Slide.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
