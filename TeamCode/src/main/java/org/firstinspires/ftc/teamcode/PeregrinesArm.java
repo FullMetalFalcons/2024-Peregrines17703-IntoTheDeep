@@ -20,7 +20,6 @@ public class PeregrinesArm {
     private DcMotorEx Slide;
     private Servo Claw, clawRotator;
 
-    CloseSpecimen closeBlue = new CloseSpecimen();
 
     public PeregrinesArm(HardwareMap hardwareMap, Telemetry telemetry1) {
         // Set up motors using MecanumDrive constants

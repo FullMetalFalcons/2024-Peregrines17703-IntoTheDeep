@@ -7,7 +7,7 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 
 @TeleOp
-public class BlueBotTeleOp_HRI extends LinearOpMode {
+public class BlueBotTeleOp extends LinearOpMode {
     //Initialize motors, servos, sensors, imus, etc.
     DcMotorEx motorLF, motorRF, motorLB, motorRB, Slide, SlideRotator;
     Servo MainClaw, MainWrist, WallClaw, WallWrist;
@@ -58,7 +58,7 @@ public class BlueBotTeleOp_HRI extends LinearOpMode {
     boolean lastWristPressed = false;
     boolean wristAtFloor = true;
 
-    final double SLIDE_LIMIT_TICKS = 1200;
+    final double SLIDE_LIMIT_TICKS = 800;
     final double ROTATOR_STRAIGHT_UP_THRESHOLD_TICKS = 10;
 
     double desiredPower;
